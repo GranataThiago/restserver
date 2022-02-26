@@ -8,7 +8,53 @@
 </head>
 <body>
     
-    <h1>Acceso denegado</h1>
+    <div id="g_id_onload"
+        data-client_id="321098210185-ofl2r2s4tgr8ftrgdkg0nlp99koc6m0i.apps.googleusercontent.com"
+        data-auto_prompt="false"
+        data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+
+    <button id="google-signout">Sign Out</button>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        function handleCredentialResponse(response) {
+
+            const body = { id_token: response.credential }
+
+            fetch('http://localhost:8080/api/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+                .then(response => response.json())
+                .then(response => {
+                    localStorage.setItem('email', response.user.email)
+                })
+                .catch(console.warn);
+        }
+
+        const googleSignout = document.getElementById('google-signout');
+
+        googleSignout.addEventListener('click', () => {
+            google.accounts.id.disableAutoSelect();
+            google.accounts.id.revoke(localStorage.getItem('email'), done => {
+                localStorage.removeItem('email');
+                location.reload();
+            });
+        });
+
+    </script>
 
 </body>
 </html>
